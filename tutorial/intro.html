@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 Circuits 2018</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 10px auto;
+      padding: 0 10px;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 0.9em;
+    }
+
+    svg {
+      outline: 1px solid steelblue;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    svg .circuit-path {
+      stroke-width: 14px;
+      stroke: steelblue;
+      fill: none;
+      opacity: 0.4;
+      cursor: pointer;
+    }
+
+    svg .circuit-path:hover {
+      stroke: red;
+      opacity: 0.7;
+    }
+
+    svg .land {
+      stroke-width: 0.5px;
+      stroke: gray;
+      fill: whitesmoke;
+    }
+
+    footer {
+      margin: 60px auto 0 auto;
+      padding: 2rem 0.5rem;
+      max-width: 480px;
+    }
+
+    footer .disclaimer {
+      font-size: 0.55em;
+      color: lightslategray;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>
+    Introduction: World Map!
+  </h1>
+  <h2>
+    FORMULA 1 Circuits on a World Map
+  </h2>
+  <p>
+    This shows a typical
+    <a href="https://d3js.org/" target="_blank">D3.js</a>
+    workflow of drawing GeoJSON data on a map.
+  </p>
+  <p>
+    I chose
+    <a href="https://en.wikipedia.org/wiki/Robinson_projection" target="_blank">the Robinson projection</a>
+    to render
+    <a href="http://en.espn.co.uk/f1/motorsport/circuit/index.html?season=2018" target="_blank">the 2018 circuits</a>
+    at a world map scale.
+  </p>
+  <p>
+    Each circuit is a line on the Earth but appears as a point since we are zoomed out.
+  </p>
+
+  <!-- each F1 circuit will be added as a child <path> element in this <svg> -->
+  <svg viewBox="0 0 600 312.5"></svg>
+
+  <p>
+    Jacob Wasilkowski,
+    <a href="https://petrichor.studio/">Petrichor Studio</a>
+  </p>
+
+  <footer>
+    <p class="disclaimer">
+      This website is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V. Original circuits data from
+      <a href="https://www.google.com/maps/d/viewer?mid=zAwYScNYWOgU.kH5VtuiZLUz4" target="_blank">"Formula 1 Circuits - 2018"</a>.
+    </p>
+  </footer>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3.0.0/dist/topojson-client.min.js"></script>
+
+  <script>
+    // load Formula 1 Circuits 2018 topojson
+    d3.json('../data/F1_Circuits_2018_topojson.json')
+      .then(function(f1CircuitsTopoJson) {
+        // topojson to geojson conversion
+        var f1CircuitsGeoJson = topojson.feature(f1CircuitsTopoJson, f1CircuitsTopoJson.objects.F1_Circuits_2018);
+
+        // get a D3js reference to the <svg> element in the DOM
+        var svg = d3.select('svg');
+        // and get the viewBox dimensions
+        var dimensions = svg.attr('viewBox').split(' ');
+        var width = dimensions[2];
+        var height = dimensions[3];
+
+        // the projection and geoPathGenerator are both needed for the geojson to svg conversion
+
+        // a Mercator or Robinson projection is acceptable because the source geojson data
+        // is in lat,long wgs84 coordinates and we are going to use a world map scale 
+        var projection = d3.geoRobinson()
+          // half of the parent svg width and height
+          .translate([width / 2, height / 2])
+          .scale((width) / (2 * Math.PI));
+
+        // the geoPathGenerator needs to know which projection to use, and
+        // it is responsible for generating the "d" attribute that each <path> element needs
+        var geoPathGenerator = d3.geoPath(projection);
+
+        // create a child <path> element in the <svg> for every geojson circuit feature
+        // and draw geojson features by converting (projecting) from geospatial coordinates
+        // to svg space using the same projection and geoPathGenerator for each circuit
+        svg.selectAll('path')
+          .data(f1CircuitsGeoJson.features)
+          .enter().append('path')
+          .attr('d', geoPathGenerator)
+          .classed('circuit-path', true)
+          // give each new <path> element a <title> child element to act as a tooltip
+          .append('title')
+          .text(function(geoJsonFeature) {
+            return geoJsonFeature.properties.Name;
+          });
+
+        // render the world landmasses for geographical context
+        d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json')
+          .then(function(worldTopoJson) {
+            svg.append('path')
+              .datum(topojson.feature(worldTopoJson, worldTopoJson.objects.land))
+              .attr('d', geoPathGenerator)
+              .classed('land', true)
+              .lower();
+          });
+      });
+  </script>
+</body>
+
+</html>

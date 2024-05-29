@@ -1,0 +1,268 @@
+{
+  "type": "FeatureCollection",
+  "features": [{
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [144.963058, -37.813628]
+      },
+      "properties": {
+        "City": "Melbourne",
+        "Country": "Australia",
+        "Trackname": "Melbourne (Albert Park) Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.473702, 31.23039]
+      },
+      "properties": {
+        "City": "Shanghai",
+        "Country": "China",
+        "Trackname": "Shanghai International Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [50.5129, 26.0316]
+      },
+      "properties": {
+        "City": "Sakhir",
+        "Country": "Bahrain",
+        "Trackname": "Bahrain International Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [39.734154, 43.602808]
+      },
+      "properties": {
+        "City": "Sochi",
+        "Country": "Russia",
+        "Trackname": "Sochi Autodrom"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.173403, 41.385064]
+      },
+      "properties": {
+        "City": "Barcelona",
+        "Country": "Spain",
+        "Trackname": "Circuit de Barcelona-Catalunya"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [7.426644, 43.740072]
+      },
+      "properties": {
+        "City": "Monte Carlo",
+        "Country": "Monaco",
+        "Trackname": "Circuit de Monaco"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.567256, 45.501689]
+      },
+      "properties": {
+        "City": "Montréal",
+        "Country": "Canada",
+        "Trackname": "Circuit Gilles Villeneuve"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.776755, 43.203551]
+      },
+      "properties": {
+        "City": "Le Castellet",
+        "Country": "France",
+        "Trackname": "Circuit Paul Ricard - Le Castellet"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [49.867092, 40.409262]
+      },
+      "properties": {
+        "City": "Baku",
+        "Country": "Azerbaijan",
+        "Trackname": "Baku City Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [143.836875, -37.533228]
+      },
+      "properties": {
+        "City": "Speilburg",
+        "Country": "Australia",
+        "Trackname": "Red Bull Ring"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.028061, 52.091477]
+      },
+      "properties": {
+        "City": "Silverstone",
+        "Country": "United Kingdom",
+        "Trackname": "Silverstone Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [8.549858, 49.319552]
+      },
+      "properties": {
+        "City": "Hockenheim",
+        "Country": "Germany",
+        "Trackname": "Hockenheimring"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [19.040235, 47.497912]
+      },
+      "properties": {
+        "City": "Budapest",
+        "Country": "Hungary",
+        "Trackname": "Hungaroring"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [5.930441, 50.394098]
+      },
+      "properties": {
+        "City": "Stavelot ",
+        "Country": "Belgium",
+        "Trackname": "Circuit de Spa-Francorchamps"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [9.189982, 45.464204]
+      },
+      "properties": {
+        "City": "Milan",
+        "Country": "Italy",
+        "Trackname": "Autodromo di Monza"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [103.819836, 1.352083]
+      },
+      "properties": {
+        "City": "Singapore",
+        "Country": "Singapore",
+        "Trackname": "Marina Bay Street Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [101.518347, 3.073838]
+      },
+      "properties": {
+        "City": "Selangor",
+        "Country": "Malaysia",
+        "Trackname": "Sepang International Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [136.584209, 34.88188]
+      },
+      "properties": {
+        "City": "Suzuka",
+        "Country": "Japan",
+        "Trackname": "Suzuka Circuit"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-97.743061, 30.267153]
+      },
+      "properties": {
+        "City": "Austin",
+        "Country": "Texas",
+        "Trackname": "Circuit of the Americas"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-99.089509, 19.404042]
+      },
+      "properties": {
+        "City": "Mexico City",
+        "Country": "Mexico",
+        "Trackname": "Autódromo Hermanos Rodríguez"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-46.697954, -23.701185]
+      },
+      "properties": {
+        "City": "Sao Paulo",
+        "Country": "Brazil",
+        "Trackname": "Autódromo José Carlos Pace"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [54.604012, 24.495839]
+      },
+      "properties": {
+        "City": "Abu Dhabi",
+        "Country": "UAE",
+        "Trackname": "Yas Marina Circuit"
+      }
+    }
+  ]
+}

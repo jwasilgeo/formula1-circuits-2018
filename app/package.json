@@ -1,0 +1,25 @@
+{
+  "name": "formula1-circuits-2018",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwasilgeo/formula1-circuits-2018.git"
+  },
+  "author": "Jacob Wasilkowski (https://jwasilgeo.github.io/)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jwasilgeo/formula1-circuits-2018/issues"
+  },
+  "homepage": "https://github.com/jwasilgeo/formula1-circuits-2018#readme",
+  "dependencies": {
+    "d3": "^5.2.0",
+    "d3-geo-projection": "^2.4.0",
+    "flubber": "^0.4.2",
+    "topojson-client": "^3.0.0",
+    "world-atlas": "^1.1.4"
+  },
+  "devDependencies": {}
+}

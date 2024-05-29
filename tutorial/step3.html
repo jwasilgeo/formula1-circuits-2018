@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 Circuits 2018</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 10px auto;
+      padding: 0px 10px;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 0.9em;
+    }
+
+    svg {
+      outline: 1px solid steelblue;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      max-width: 600px;
+    }
+
+    svg .circuit-path {
+      stroke-width: 2px;
+      stroke: steelblue;
+      fill: none;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>Step 3: Animate!</h1>
+  <h2>FORMULA 1 Circuits Stacked and Animated</h2>
+  <p>Don't worry: the circuits are still stacked on top of each other.</p>
+  <p>But, we only show you one circuit at a time and animate endlessly to the next circuit.</p>
+  <p>Thanks for making the SVG animations possible,
+    <a href="https://github.com/veltman/flubber" target="_blank">flubber</a>!
+  </p>
+
+  <!-- each F1 circuit will be added as a child <path> element in this <svg> -->
+  <svg viewBox="0 0 500 500"></svg>
+
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3.0.0/dist/topojson-client.min.js"></script>
+  <script src="https://unpkg.com/flubber@0.4.2/build/flubber.min.js"></script>
+
+  <script>
+    // load Formula 1 Circuits 2018 topojson
+    d3.json('../data/F1_Circuits_2018_topojson.json')
+      .then(function(f1CircuitsTopoJson) {
+        // topojson to geojson conversion
+        var f1CircuitsGeoJson = topojson.feature(f1CircuitsTopoJson, f1CircuitsTopoJson.objects.F1_Circuits_2018);
+
+        // get a D3js reference to the <svg> element in the DOM
+        var svg = d3.select('svg');
+        // and get the viewBox dimensions
+        var dimensions = svg.attr('viewBox').split(' ');
+        var width = dimensions[2];
+        var height = dimensions[3];
+
+        // create an array of the svg path information (the "d" attribute) for each circuit geojson
+        // (again, each geojson feature uses a uniquely centered projection)
+        var allCircuitPaths = f1CircuitsGeoJson.features.map(function(geoJsonFeature) {
+          var featureCentroid = d3.geoCentroid(geoJsonFeature);
+          var featureCentroidRotation = [-featureCentroid[0], -featureCentroid[1]];
+
+          var projection = d3.geoMercator()
+            .translate([width / 2, height / 2])
+            .scale(1200000)
+            .rotate(featureCentroidRotation);
+
+          var geoPathGenerator = d3.geoPath(projection);
+
+          return geoPathGenerator(geoJsonFeature);
+        });
+
+        // create a child <path> element in the <svg>
+        // and set its "d" attribute value as the shape of the first F1 circuit
+        // and get a D3js reference to it for later use
+        var pathElementToAnimate = svg.append('path')
+          .attr('d', allCircuitPaths[0])
+          .classed('circuit-path', true);
+
+        // using the single <path> element that was just created,
+        // cycle endlessly over each svg path info
+        // and change/transition the "d" attribute value
+        animateTheCircuits(pathElementToAnimate, allCircuitPaths);
+      });
+
+    function animateTheCircuits(pathElementToAnimate, allCircuitPaths) {
+      // modify the info array in-place to achieve continuous cycling
+      var start = allCircuitPaths.shift();
+      var end = allCircuitPaths[0];
+      allCircuitPaths.push(start);
+
+      var interpolator = flubber.interpolate(start, end);
+
+      pathElementToAnimate
+        .transition()
+        .duration(1250)
+        .delay(1000)
+        .attrTween('d', function() {
+          return interpolator;
+        })
+        .on('end', function() {
+          // rinse and repeat
+          animateTheCircuits(pathElementToAnimate, allCircuitPaths);
+        });
+    }
+  </script>
+</body>
+
+</html>

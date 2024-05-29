@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 World Circuits 2018</title>
+  <meta name="description" content="Data visualization and mapping of the 2018 Formula 1 World Circuits.">
+
+  <link href="./main.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1 class="retro-cyber-font">
+    FORMULA 1 WORLD CIRCUITS /// 2018
+  </h1>
+
+  <svg class="circuits-map" viewBox="0 0 500 500">
+    <defs>
+      <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="5" result="coloredBlur" />
+        <feMerge>
+          <feMergeNode in="coloredBlur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+
+    <path class="circuit-path-glow" filter="url(#glowFilter)"></path>
+    <path class="circuit-path-main"></path>
+  </svg>
+
+  <svg class="world-map" viewBox="0 0 500 260.42">
+    <defs>
+      <radialGradient id="radialGradient">
+        <stop offset="10%" stop-color="#ff8ee3" />
+        <stop offset="100%" stop-color="#f70bbc" />
+      </radialGradient>
+
+    </defs>
+    <path class="land"></path>
+  </svg>
+
+  <p class="circuit-info-text retro-cyber-font uppercase-text"></p>
+
+  <p class="author retro-cyber-font white-text uppercase-text">
+    Jacob Wasilkowski ///
+    <a class="white-text" href="https://petrichor.studio/">Petrichor.Studio</a>
+  </p>
+
+  <footer class="retro-cyber-font">
+    <p class="disclaimer">
+      This website is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V. Original circuits data from
+      <a href="https://www.google.com/maps/d/viewer?mid=zAwYScNYWOgU.kH5VtuiZLUz4" target="_blank">"Formula 1 Circuits - 2018"</a>.
+      <a href="https://fonts.google.com/specimen/Exo+2" target="_blank">Exo2 font</a> (c) 2013, Natanael Gama.
+    </p>
+  </footer>
+
+  <script src="./node_modules/d3/dist/d3.min.js"></script>
+  <script src="./node_modules/d3-geo-projection/build/d3-geo-projection.min.js"></script>
+  <script src="./node_modules/topojson-client/dist/topojson-client.min.js"></script>
+  <script src="./node_modules/flubber/build/flubber.min.js"></script>
+
+  <script src="./app.js"></script>
+</body>
+
+</html>

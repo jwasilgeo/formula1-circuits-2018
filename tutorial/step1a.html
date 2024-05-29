@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 Circuits 2018</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 10px auto;
+      padding: 0 10px;
+      /* max-width: 600px; */
+      text-align: center;
+    }
+
+    p {
+      font-size: 0.9em;
+    }
+
+    svg {
+      outline: 1px solid steelblue;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      max-width: 600px;
+    }
+
+    canvas.mercator-map .circuit-path {
+      stroke-width: 8px;
+      stroke: steelblue;
+      fill: steelblue;
+      opacity: 0.6;
+    }
+
+    svg.orthographic-map .circuit-path {
+      stroke-width: 2px;
+      stroke: steelblue;
+      fill: steelblue;
+      opacity: 0.6;
+    }
+
+    svg.stacking-map .circuit-path {
+      stroke-width: 2px;
+      stroke: steelblue;
+      fill: none;
+      /* opacity: 0.4; */
+    }
+
+    svg .land {
+      stroke-width: 0.5px;
+      stroke: gray;
+      fill: whitesmoke;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- <svg class="world-map" viewBox="0 0 600 312.5"> -->
+  <!-- 1.92 -->
+  <!-- <svg class="world-map" viewBox="0 0 960 500"> -->
+
+  <!-- each F1 circuit will be added as a child <path> element in this <svg> -->
+  <!-- <svg class="mercator-map" viewBox="0 0 600 600"></svg> -->
+  <canvas class="mercator-map" width="600" height="600"></canvas>
+  <svg class="orthographic-map" viewBox="0 0 600 600"></svg>
+  <svg class="stacking-map" viewBox="0 0 300 300"></svg>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <!-- <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script> -->
+  <script src="https://unpkg.com/topojson-client@3.0.0/dist/topojson-client.min.js"></script>
+
+  <script>
+    Promise.all([
+      d3.json('../data/F1_Circuits_2018_topojson.json'),
+      d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json')
+    ])
+      .then(function(loadedTopoJsonResults) {
+        var f1CircuitsTopoJson = loadedTopoJsonResults[0];
+        var worldTopoJson = loadedTopoJsonResults[1];
+
+        var f1CircuitsGeoJson = topojson.feature(f1CircuitsTopoJson, f1CircuitsTopoJson.objects.F1_Circuits_2018);
+        var worldGeoJson = topojson.feature(worldTopoJson, worldTopoJson.objects.land);
+
+        var geoCircles = {
+          type: 'GeometryCollection',
+          geometries: f1CircuitsGeoJson.features.map(function(geoJsonFeature) {
+            return d3.geoCircle().center(d3.geoCentroid(geoJsonFeature)).radius(1.5)();
+          })
+        };
+
+        var mercatorMap = createMercatorMap(worldGeoJson, geoCircles);
+        // var orthographicMap = createOrthographicMap(f1CircuitsGeoJson, worldGeoJson);
+
+        // rotateMaps(f1CircuitsGeoJson, mercatorMap, orthographicMap, 0);
+
+        rotateMap(mercatorMap, worldGeoJson, f1CircuitsGeoJson, geoCircles);
+      });
+
+    function rotateMap(mercatorMap, worldGeoJson, f1CircuitsGeoJson, geoCircles) {
+      var nextGeoJsonFeature = f1CircuitsGeoJson.features[0];
+      var nextCentroid = d3.geoCentroid(nextGeoJsonFeature);
+      var nextRotationDestination = [-nextCentroid[0], -nextCentroid[1]];
+
+      d3.select({}).transition()
+        .duration(1250)
+        .delay(1000)
+        .tween(null, function() {
+          var interpolator = d3.interpolate(mercatorMap.geoPathGenerator.projection().rotate(), nextRotationDestination)
+
+          return function(t) {
+            mercatorMap.geoPathGenerator.projection().rotate(interpolator(t));
+
+            mercatorMap.ctx.clearRect(0, 0, mercatorMap.canvas.node().width, mercatorMap.canvas.node().height);
+
+            mercatorMap.ctx.beginPath();
+            mercatorMap.geoPathGenerator(worldGeoJson);
+            mercatorMap.ctx.stroke();
+            mercatorMap.ctx.closePath();
+
+            mercatorMap.ctx.beginPath();
+            mercatorMap.geoPathGenerator(geoCircles);
+            mercatorMap.ctx.fill();
+            mercatorMap.ctx.closePath();
+          };
+        })
+        .on('end', function() {
+          f1CircuitsGeoJson.features.push(f1CircuitsGeoJson.features.shift());
+          rotateMap(mercatorMap, worldGeoJson, f1CircuitsGeoJson, geoCircles);
+        });
+
+    }
+
+    function createMercatorMap(worldGeoJson, geoCircles) {
+      var canvas = d3.select('canvas.mercator-map');
+      var width = +canvas.attr('width');
+      var height = +canvas.attr('height');
+      var ctx = canvas.node().getContext('2d');
+
+      var projection = d3.geoMercator()
+        .translate([width / 2, height / 2])
+        // .scale((width) / (2 * Math.PI));
+        .scale((width - 3) / (2 * Math.PI));
+
+      var geoPathGenerator = d3.geoPath(projection).context(ctx);
+
+      ctx.beginPath();
+      geoPathGenerator(worldGeoJson);
+      ctx.stroke();
+      ctx.closePath();
+
+      ctx.beginPath();
+      geoPathGenerator(geoCircles);
+      ctx.fill();
+      ctx.closePath();
+
+      return {
+        canvas: canvas,
+        ctx: ctx,
+        geoPathGenerator: geoPathGenerator
+      }
+    }
+
+    function createOrthographicMap(f1CircuitsGeoJson, worldGeoJson) {
+      var svg = d3.select('svg.orthographic-map');
+      var dimensions = svg.attr('viewBox').split(' ');
+      var width = dimensions[2];
+      var height = dimensions[3];
+
+      var projection = d3.geoOrthographic()
+        .translate([width / 2, height / 2]);
+
+      var geoPathGenerator = d3.geoPath(projection);
+
+      svg.selectAll('path')
+        .data(f1CircuitsGeoJson.features)
+        .enter().append('path')
+        .attr('d', function(geoJsonFeature) {
+          var geoJsonCircle = d3.geoCircle().center(d3.geoCentroid(geoJsonFeature)).radius(1.5)();
+          return geoPathGenerator(geoJsonCircle);
+        })
+        .classed('circuit-path', true);
+
+      svg.append('path')
+        .datum(worldGeoJson)
+        .attr('d', geoPathGenerator)
+        .classed('land', true)
+        .lower();
+
+      return {
+        svg: svg,
+        geoPathGenerator: geoPathGenerator
+      }
+    }
+
+    function rotateMaps(geoJsonCollection, mercatorMap, orthographicMap, repeatCount) {
+      var nextGeoJsonFeature = geoJsonCollection.features[0];
+      var nextCentroid = d3.geoCentroid(nextGeoJsonFeature);
+      var nextRotationDestination = [-nextCentroid[0], -nextCentroid[1]];
+
+      var svgs = d3.selectAll([mercatorMap.svg.node(), orthographicMap.svg.node()]);
+
+      svgs.selectAll('path')
+        .transition()
+        .duration(1250)
+        .delay(1000)
+        .attrTween('d', function(geoJsonFeature) {
+          // for the current element being transitioned, figure out which svg "map" it belongs to
+          // this needs to happen because each svg "map" uses a different projection and geoPathGenerator
+          var geoPathGenerator;
+          if (this.parentNode === mercatorMap.svg.node()) {
+            geoPathGenerator = mercatorMap.geoPathGenerator;
+          } else if (this.parentNode === orthographicMap.svg.node()) {
+            geoPathGenerator = orthographicMap.geoPathGenerator;
+          } else {
+            return '';
+          }
+
+          var interpolator = d3.interpolate(geoPathGenerator.projection().rotate(), nextRotationDestination);
+
+          // find out if the landmasses or one of the circles is the element currently being transitioned
+          if (d3.select(this).classed('land')) {
+            return function(t) {
+              geoPathGenerator.projection().rotate(interpolator(t));
+              return geoPathGenerator(geoJsonFeature) || '';
+            };
+          } else if (d3.select(this).classed('circuit-path')) {
+            return function(t) {
+              geoPathGenerator.projection().rotate(interpolator(t));
+              var geoJsonCircle = d3.geoCircle().center(d3.geoCentroid(geoJsonFeature)).radius(1.5)();
+              return geoPathGenerator(geoJsonCircle) || '';
+            };
+          } else {
+            return '';
+          }
+        })
+        .on('start', function(d, idx, nodeList) {
+          while (idx < (nodeList.length - 1)) {
+            return;
+          }
+
+          if (this.parentNode !== orthographicMap.svg.node()) {
+            return;
+          }
+
+          svgs.selectAll('path.circuit-path')
+            .style('stroke', 'steelblue')
+            .style('fill', 'steelblue')
+            .filter(function(geoJsonFeature) {
+              return geoJsonFeature.properties.Name === nextGeoJsonFeature.properties.Name;
+            })
+            .style('stroke', 'red')
+            .style('fill', 'red')
+            .raise();
+        })
+        .on('end', function(d, idx, nodeList) {
+          while (idx < (nodeList.length - 1)) {
+            return;
+          }
+
+          if (this.parentNode !== orthographicMap.svg.node()) {
+            return;
+          }
+
+          repeatCount++
+
+          addToStackingMap(nextGeoJsonFeature);
+
+          // reset all the circles back to the original color when starting the entire cycle over again
+          // and clear the stacked circuits
+          if (repeatCount === geoJsonCollection.features.length) {
+
+            // rinse and repeat after a delay
+            setTimeout(function() {
+              svgs.selectAll('path.circuit-path')
+                .style('stroke', 'steelblue')
+                .style('fill', 'steelblue');
+
+              repeatCount = 0;
+
+              clearStackingMap();
+
+              geoJsonCollection.features.push(geoJsonCollection.features.shift());
+              rotateMaps(geoJsonCollection, mercatorMap, orthographicMap, repeatCount);
+            }, 3000);
+          } else {
+            // repeat to continue to the next circuit location
+            geoJsonCollection.features.push(geoJsonCollection.features.shift());
+            rotateMaps(geoJsonCollection, mercatorMap, orthographicMap, repeatCount);
+          }
+
+        });
+    }
+
+    function clearStackingMap() {
+      d3.select('svg.stacking-map').selectAll('path').remove();
+    }
+
+    function addToStackingMap(geoJsonFeature) {
+      var svg = d3.select('svg.stacking-map');
+      var dimensions = svg.attr('viewBox').split(' ');
+      var width = dimensions[2];
+      var height = dimensions[3];
+
+      svg.append('path')
+        .datum(geoJsonFeature)
+        .attr('d', function(geoJsonFeature) {
+          var featureCentroid = d3.geoCentroid(geoJsonFeature);
+          var featureCentroidRotation = [-featureCentroid[0], -featureCentroid[1]];
+
+          var projection = d3.geoMercator()
+            .translate([width / 2, height / 2])
+            .scale(2400 * width)
+            .rotate(featureCentroidRotation);
+
+          var geoPathGenerator = d3.geoPath(projection);
+
+          return geoPathGenerator(geoJsonFeature);
+        })
+        .classed('circuit-path', true)
+        .raise()
+        .style('opacity', 0)
+        .transition()
+        .style('opacity', 1);
+
+      svg.selectAll('path:not(:last-child)')
+        .transition()
+        .style('stroke-width', 1)
+        .style('opacity', 0.3);
+      // .style('opacity', function(geoJsonFeature, idx, nodeList) {
+      //   var newOpacity = d3.easeQuadIn((idx + 1) / nodeList.length);
+      //   return newOpacity > 0.1 ? newOpacity : 0.1;
+      // });
+    }
+  </script>
+</body>
+
+</html>

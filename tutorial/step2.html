@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>F1 Circuits 2018</title>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 10px auto;
+      padding: 0px 10px;
+      max-width: 800px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 0.9em;
+    }
+
+    svg {
+      outline: 1px solid steelblue;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      max-width: 600px;
+    }
+
+    svg .circuit-path {
+      stroke-width: 2px;
+      stroke: steelblue;
+      fill: none;
+      opacity: 0.4;
+      cursor: pointer;
+      transform-origin: center;
+      transition: stroke-width 0.25s, stroke 0.25s, opacity 0.25s;
+    }
+
+    svg .circuit-path:hover {
+      stroke-width: 3.5px;
+      stroke: red;
+      opacity: 0.7;
+    }
+
+    p.emojis {
+      font-size: 2.5em;
+    }
+
+  </style>
+</head>
+
+<body>
+  <h1>Step 2: Stack Them All!</h1>
+  <h2>FORMULA 1 Circuits Stacked on Top of Each Other</h2>
+  <p>Now we'll do something fun and maybe a little weird:
+    <strong>make a pile of 21 transparent maps</strong>.
+  </p>
+  <p>Each circuit is rendered using its own projection that is centered and zoomed to that circuit.</p>
+  <p>Because they are placed in the same SVG element they appear to be piled on top of each other.</p>
+
+  <!-- each F1 circuit will be added as a child <path> element in this <svg> -->
+  <svg viewBox="0 0 500 500"></svg>
+
+  <p class="emojis">&#x1F3CE; &#x1F3CE; &#x1F3CE; &#x1F3C1; &#x1F3C6; &#x1f60e;</p>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3.0.0/dist/topojson-client.min.js"></script>
+
+  <script>
+    // load Formula 1 Circuits 2018 topojson
+    d3.json('../data/F1_Circuits_2018_topojson.json')
+      .then(function(f1CircuitsTopoJson) {
+        // topojson to geojson conversion
+        var f1CircuitsGeoJson = topojson.feature(f1CircuitsTopoJson, f1CircuitsTopoJson.objects.F1_Circuits_2018);
+
+        // get a D3js reference to the <svg> element in the DOM
+        var svg = d3.select('svg');
+        // and get the viewBox dimensions
+        var dimensions = svg.attr('viewBox').split(' ');
+        var width = dimensions[2];
+        var height = dimensions[3];
+
+        // create a child <path> element in the <svg> for every geojson circuit feature
+        // and draw geojson features by converting (projecting) from geospatial coordinates
+        // to svg space using a unique projection and geoPathGenerator for each circuit
+        svg.selectAll('path')
+          .data(f1CircuitsGeoJson.features)
+          .enter().append('path')
+          .attr('d', function(geoJsonFeature) {
+            // as each geojson feature is being drawn to an svg path,
+            // use a unique projection that is rotated to the centroid of the geojson feature
+            // which will make all the features "stacked" on top of each other in svg coordinate space
+            var featureCentroid = d3.geoCentroid(geoJsonFeature);
+            var featureCentroidRotation = [-featureCentroid[0], -featureCentroid[1]];
+
+            var projection = d3.geoMercator()
+              // half of the parent <svg> width and height
+              .translate([width / 2, height / 2])
+              // this scale seems to work well for all the circuits
+              // when the <svg> dimensions are a square of 500px by 500px
+              .scale(1200000)
+              // the rotation is what is most important for stacking features and
+              // it is calculated by finding the centroid coordinates of the geojson circuit
+              .rotate(featureCentroidRotation);
+
+            // the geoPathGenerator is responsible for generating the "d" attribute that a <path> element needs
+            var geoPathGenerator = d3.geoPath(projection);
+
+            return geoPathGenerator(geoJsonFeature);
+          })
+          .classed('circuit-path', true)
+          .style('transform', 'scale(0.01)')
+          // give each new <path> element a <title> child element to act as a tooltip
+          .append('title')
+          .text(function(d) {
+            return d.properties.Name;
+          });
+
+        transformCircuits('none', d3.easeBackOut);
+
+        svg.on('click', function() {
+          transformCircuits('scale(0.01)', d3.easeBackIn, function() {
+            setTimeout(function() {
+              transformCircuits('none', d3.easeBackOut);
+            }, 250);
+          })
+        });
+
+        function transformCircuits(transformValue, easing, callback) {
+          svg.selectAll('path.circuit-path')
+            .interrupt()
+            .each(function(d, idx, nodeList) {
+              d3.select(this)
+                .transition()
+                .delay(100 * idx)
+                .ease(easing)
+                .style('transform', transformValue)
+                .on('end', function() {
+                  while (idx < (nodeList.length - 1)) {
+                    return;
+                  }
+
+                  if (callback) {
+                    callback();
+                  }
+                });
+            });
+        }
+
+      });
+  </script>
+</body>
+
+</html>

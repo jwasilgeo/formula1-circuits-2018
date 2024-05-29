@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  body {
+    background-color: black;
+  }
+
+  .stroke {
+    fill: none;
+    stroke: #000;
+    stroke-width: 3px;
+  }
+
+  .fill {
+    fill: none;
+  }
+
+  .graticule {
+    fill: none;
+    stroke: #f70bbc;
+    stroke-width: 0.5px;
+    stroke-opacity: 0.5;
+  }
+
+  .land {
+    fill: rgba(0, 0, 0, 1.0);
+    stroke: rgba(247, 11, 188, 0.65);
+    stroke-width: 0.2px;
+  }
+
+  .boundary {
+    fill: none;
+    stroke: #f70bbc;
+    stroke-width: 0.2px;
+}
+  .cities {
+    fill: #999;
+    stroke: #d12020;
+  }
+</style>
+<svg width="960" height="960"></svg>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="https://unpkg.com/topojson-client@3.0.0/dist/topojson-client.min.js"></script>
+<script>
+  var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+  var g = svg.append("g");
+
+  var projection = d3.geoRobinson()
+    .scale((width - 3) / (2 * Math.PI))
+    .translate([width / 2, height / 2]);
+
+  var path = d3.geoPath()
+    .projection(projection);
+
+  var graticule = d3.geoGraticule();
+
+  svg.append("defs").append("path")
+    .datum({
+      type: "Sphere"
+    })
+    .attr("id", "sphere")
+    .attr("d", path);
+
+  svg.append("use")
+    .attr("class", "stroke")
+    .attr("xlink:href", "#sphere");
+
+  svg.append("use")
+    .attr("class", "fill")
+    .attr("xlink:href", "#sphere");
+
+  svg.append("path")
+    .datum(graticule)
+    .attr("class", "graticule")
+    .attr("d", path);
+
+  d3.json("https://unpkg.com/world-atlas@1/world/50m.json").then(function(world) {
+
+    svg.insert("path", ".land")
+      .datum(topojson.feature(world, world.objects.land))
+      .attr("class", "land")
+      .attr("d", path);
+
+      svg.insert("path", ".boundary")
+      .datum(topojson.feature(world, world.objects.countries))
+      .attr("class", "boundary")
+      .attr("d", path);
+
+    svg.insert("path", ".graticule")
+      .datum(topojson.mesh(world, world.objects.countries, function(a, b) {
+        return a !== b;
+      }))
+      .attr("d", path);
+  });
+  // loading F1 cities
+  var cities = svg.append("g");
+
+  d3.json('f1_Cities.json')
+    .then(function(f1CitiesTopoJson) {
+      // topojson to geojson conversion
+      var f1Cities = topojson.feature(f1CitiesTopoJson, f1CitiesTopoJson.objects.f1_Cities);
+
+      var svg = d3.select('svg');
+
+      var projection = d3.geoRobinson()
+
+      var projGenerator = d3.geoPath(projection);
+
+      svg.selectAll('path')
+      .data(f1_Cities.features)
+      .enter().append('path')
+      .attr('d', projGenerator)
+      .classed('cities', true);
+    });
+
+
+
+
+
+</script>
