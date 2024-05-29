@@ -100,16 +100,16 @@ svg .cities {
 }
 
 .author {
-  margin-top: 50px;
+  margin-top: 25x;
   font-size: 1.3em;
 }
 
 .author a {
-  text-decoration-style: double
+  text-decoration-style: double;
 }
 
 footer {
-  margin: 80px auto 0 auto;
+  margin: 50px auto 0 auto;
   padding: 2em 0.5em 0.5em;
   max-width: 480px;
 }

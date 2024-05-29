@@ -67,7 +67,7 @@ function main() {
     });
 
   function generateWorldMap(f1CircuitsGeoJson) {
-    d3.json('./node_modules/world-atlas/world/110m.json')
+    d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json')
       .then(function(world) {
         var svg = d3.select('svg.world-map');
         var dimensions = svg.attr('viewBox').split(' ');
